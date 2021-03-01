@@ -1,0 +1,8 @@
+apiVersion: v2
+name: shinobi
+version: 0.0.1
+type: application
+description: Open source CCTV solution written in node.js
+home: https://github.com/anchorlytics/shinobi-helm
+sources:
+- https://github.com/anchorlytics/shinobi-helm
