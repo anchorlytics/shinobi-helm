@@ -1,0 +1,17 @@
+namespace: shinobi
+image:
+  name: shinobisystems/shinobi
+  tag: latest
+  pullPolicy: IfNotPresent
+deployment:
+  replicas:
+  labels:
+  annotations:
+  pod:
+    labels:
+    annotations:
+    resources:
+    env:
+    envFrom:
+  pvc:
+    config:

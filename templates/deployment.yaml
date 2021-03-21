@@ -1,13 +1,82 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: 
+  name: {{ template "tpl.name" . }}
   labels:
+    {{- include "tpl.labels" | nindent 4 }}
+    {{- with .Values.deployment.labels }}
+    {{-   toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.deployment.annotations }}
   annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
-  replicas:
+  replicas: {{ default 1 .Values.deployment.replicas }}
+  selector:
+    matchLabels:
+      {{- include "tpl.selectorLabels" | nindent 6 }}
   template:
     metadata:
+      labels:
+        {{- include "tpl.labels" | nindent 8 }}
+        {{- with .Values.deployment.pod.labels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.deployment.pod.annotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     spec:
       containers:
-      - image: 
+      - name: {{ template "tpl.name" . }}
+        image: "{{ .Values.image.name }}:{{ .Values.image.tag }}"
+        {{- with .Values.deployment.pod.resources }}
+        resources:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.deployment.pod.env }}
+        env:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.deployment.pod.envFrom }}
+        envFrom:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        volumeMounts:
+        - name: config
+          mountPath: /config
+        - name: autoload
+          mountPath: /home/Shinobi/libs/customAutoLoad
+        - name: db
+          mountPath: /var/lib/mysql
+        - name: videos
+          mountPath: /home/Shinobi/videos
+        - name: plugins
+          mountPath: /home/Shinobi/plugins
+        - name: streams
+          mountPath: /dev/shm/streams
+      volumes:
+      - name: config
+        persistentVolumeClaim:
+          claimName: config
+      - name: autoload
+        persistentVolumeClaim:
+          claimName: autoload
+      - name: db
+        persistentVolumeClaim:
+          claimName: db
+      - name: videos
+        persistentVolumeClaim:
+          claimName: videos
+      - name: plugins
+        persistentVolumeClaim:
+          claimName: plugins
+      - name: streams
+        emptyDir:
+          medium: Memory
